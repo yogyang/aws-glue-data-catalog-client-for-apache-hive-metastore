@@ -91,6 +91,7 @@ import static com.amazonaws.glue.catalog.converters.ConverterUtils.stringToCatal
 import static com.amazonaws.glue.catalog.util.MetastoreClientUtils.deepCopyMap;
 import static com.amazonaws.glue.catalog.util.MetastoreClientUtils.isExternalTable;
 import static com.amazonaws.glue.catalog.util.MetastoreClientUtils.makeDirs;
+import static com.amazonaws.glue.catalog.util.MetastoreClientUtils.makePartitionLocation;
 import static com.amazonaws.glue.catalog.util.MetastoreClientUtils.validateGlueTable;
 import static com.amazonaws.glue.catalog.util.MetastoreClientUtils.validateTableObject;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -628,7 +629,7 @@ public class GlueMetastoreClientDelegate {
         boolean partDirCreated = false;
         if (location != null) {
           partition.getSd().setLocation(location.toString());
-          partDirCreated = makeDirs(wh, location);
+          partDirCreated = makePartitionLocation(wh, location);
         }
         Partition catalogPartition = HiveToCatalogConverter.convertPartition(partition);
         catalogPartitions.add(catalogPartition);

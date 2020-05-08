@@ -14,6 +14,8 @@ import org.apache.hadoop.hive.metastore.api.InvalidObjectException;
 import org.apache.hadoop.hive.metastore.api.MetaException;
 import org.apache.hadoop.hive.metastore.api.Table;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -45,6 +47,35 @@ public final class MetastoreClientUtils {
       madeDir = true;
     }
     return madeDir;
+  }
+
+  /**
+   * @return boolean
+   *     true -> if path as a directory was able to be created.
+   *     false -> if path already exists, can either be a file or a directory.
+   * @throws MetaException if directory could not be created.
+   */
+  public static boolean makePartitionLocation(Warehouse wh, Path path) throws MetaException {
+    checkNotNull(wh, "Warehouse cannot be null");
+    checkNotNull(path, "Path cannot be null");
+
+    boolean newCreated = false;
+    try {
+      wh.getFs(path).getFileStatus(path);
+      newCreated = false;
+    } catch (FileNotFoundException e) {
+      // create the path as a dir if not exist
+      if (!wh.mkdirs(path, true)) {
+        throw new MetaException("Unable to create path: " + path);
+      }
+      newCreated = true;
+    } catch (IOException e) {
+      String exInfo = "Got exception: " + e.getClass().getName() + " "
+              + e.getMessage();
+      throw new MetaException(exInfo);
+    }
+
+    return newCreated;
   }
 
   /**
